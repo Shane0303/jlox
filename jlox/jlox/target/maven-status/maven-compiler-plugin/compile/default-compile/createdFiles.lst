@@ -1,9 +1,0 @@
-com\craftinginterpreters\lox\Lox$LoxToken.class
-com\craftinginterpreters\lox\Token.class
-com\craftinginterpreters\lox\Lox$LoxScanner.class
-com\craftinginterpreters\lox\Parser.class
-com\craftinginterpreters\tool\GenerateAst.class
-com\craftinginterpreters\lox\AstPrinter.class
-com\craftinginterpreters\lox\Lox.class
-com\craftinginterpreters\lox\Scanner.class
-com\craftinginterpreters\lox\TokenType.class

@@ -69,6 +69,14 @@ public class Lox {
         hadError = true;
     }
 
+    static void error(Token token, String message) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    static void runtimeError(RuntimeError error) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     // Placeholder LoxScanner class
     private static class LoxScanner {
         public LoxScanner(String source) {
