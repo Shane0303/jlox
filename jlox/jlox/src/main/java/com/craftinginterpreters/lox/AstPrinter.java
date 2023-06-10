@@ -4,19 +4,23 @@
  */
 package com.craftinginterpreters.lox;
 
+
 class AstPrinter implements Expr.Visitor<String> 
 {
-  String print(Expr expr) {
+  String print(Expr expr)
+  {
     return expr.accept(this);
   }
   @Override
-  public String visitBinaryExpr(Expr.Binary expr) {
+  public String visitBinaryExpr(Expr.Binary expr) 
+  {
     return parenthesize(expr.operator.lexeme,
                         expr.left, expr.right);
   }
 
   @Override
-  public String visitGroupingExpr(Expr.Grouping expr) {
+  public String visitGroupingExpr(Expr.Grouping expr)
+  {
     return parenthesize("group", expr.expression);
   }
 
@@ -54,4 +58,9 @@ class AstPrinter implements Expr.Visitor<String>
 
     System.out.println(new AstPrinter().print(expression));
   }
+
+    @Override
+    public <R> R visitAssignExpr(Expr.Assign aThis) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
