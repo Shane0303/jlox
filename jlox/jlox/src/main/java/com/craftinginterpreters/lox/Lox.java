@@ -4,6 +4,7 @@
 
 package com.craftinginterpreters.lox;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +14,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Lox {
-    private static boolean hadError = false;
+    private static final Interpreter interpreter = new Interpreter();
+    static boolean hadError = false;
+    static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -28,13 +31,10 @@ public class Lox {
 
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        String source = new String(bytes, Charset.defaultCharset());
-        run(source);
+        run(new String(bytes, Charset.defaultCharset()));
 
-        // Indicate an error in the exit code.
-        if (hadError) {
-            System.exit(65);
-        }
+        if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException {
@@ -46,18 +46,30 @@ public class Lox {
             String line = reader.readLine();
             if (line == null) break;
             run(line);
-            hadError = false; // Reset error flag for each line in the prompt.
+            hadError = false;
         }
     }
-
     private static void run(String source) {
-        LoxScanner scanner = new LoxScanner(source);
-        List<LoxToken> tokens = scanner.scanTokens();
+        Scanner scanner = new Scanner(source);
+        List<Token> tokens = scanner.scanTokens();
+        Parser parser = new Parser(tokens);
+        List<Stmt> statements = parser.parse();
 
-        // For now, just print the tokens.
-        for (LoxToken token : tokens) {
-            System.out.println(token);
-        }
+        // Stop if there was a syntax error.
+        if (hadError) return;
+        Resolver resolver = new Resolver(interpreter) {
+            @Override
+            public Void visitSuperExpr(Expr.Super expr) {
+                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
+        };
+        resolver.resolve(statements);
+        
+        // Stop if there was a resolution error.
+        if (hadError) return;
+
+
+        interpreter.interpret(statements);
     }
 
     static void error(int line, String message) {
@@ -65,32 +77,21 @@ public class Lox {
     }
 
     private static void report(int line, String where, String message) {
-        System.err.println("[line " + line + "] Error" + where + ": " + message);
+        System.err.println(
+            "[line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
 
     static void error(Token token, String message) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (token.type == TokenType.EOF) {
+            report(token.line, " at end", message);
+        } else {
+            report(token.line, " at '" + token.lexeme + "'", message);
+        }
     }
-
     static void runtimeError(RuntimeError error) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    // Placeholder LoxScanner class
-    private static class LoxScanner {
-        public LoxScanner(String source) {
-        }
-
-        public List<LoxToken> scanTokens() {
-            // TODO: Implement tokenization logic
-            return null;
-        }
-    }
-
-    // Placeholder LoxToken class
-    private static class LoxToken {
-        // TODO: Define token properties and methods
-    }
+        System.err.println(error.getMessage() +
+        "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
+  }
 }
-
